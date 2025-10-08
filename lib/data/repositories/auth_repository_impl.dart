@@ -2,11 +2,16 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thought_box/data/repositories/auth_repository.dart';
 import '../../core/error/failures.dart';
+import '../datasources/local/cache_manager.dart'; 
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth firebaseAuth;
+  final CacheManager cacheManager;
 
-  AuthRepositoryImpl(this.firebaseAuth);
+  AuthRepositoryImpl({
+    required this.firebaseAuth,
+    required this.cacheManager, 
+  });
 
   @override
   Future<Either<Failure, User>> signIn({
@@ -46,6 +51,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    await cacheManager.clearAllCache();
+    
     await firebaseAuth.signOut();
   }
 

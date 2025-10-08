@@ -6,11 +6,14 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
 
-  AuthBloc(this.authRepository) : super(AuthInitial()) {
+  AuthBloc(this.authRepository) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthSignInRequested>(_onSignInRequested);
     on<AuthSignUpRequested>(_onSignUpRequested);
     on<AuthSignOutRequested>(_onSignOutRequested);
+    on<PasswordVisibilityToggled>(_onPasswordVisibilityToggled);
+    on<ValidationErrorTriggered>(_onValidationErrorTriggered);
+    on<ValidationErrorCleared>(_onValidationErrorCleared);
   }
 
   Future<void> _onCheckRequested(
@@ -21,7 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (user != null) {
       emit(AuthAuthenticated(user));
     } else {
-      emit(AuthUnauthenticated());
+      emit(const AuthUnauthenticated());
     }
   }
 
@@ -29,7 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await authRepository.signIn(
       email: event.email,
       password: event.password,
@@ -44,7 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await authRepository.signUp(
       email: event.email,
       password: event.password,
@@ -60,6 +63,83 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await authRepository.signOut();
-    emit(AuthUnauthenticated());
+    emit(const AuthUnauthenticated());
+  }
+
+  // NEW: Toggle password visibility
+  void _onPasswordVisibilityToggled(
+    PasswordVisibilityToggled event,
+    Emitter<AuthState> emit,
+  ) {
+    final newObscure = !state.obscurePassword;
+
+    if (state is AuthUnauthenticated) {
+      emit(AuthUnauthenticated(
+        obscurePassword: newObscure,
+        showValidationError: state.showValidationError,
+      ));
+    } else if (state is AuthError) {
+      final currentState = state as AuthError;
+      emit(AuthError(
+        currentState.message,
+        obscurePassword: newObscure,
+        showValidationError: state.showValidationError,
+      ));
+    } else {
+      emit(AuthInitial(
+        obscurePassword: newObscure,
+        showValidationError: state.showValidationError,
+      ));
+    }
+  }
+
+  // NEW: Trigger validation error
+  void _onValidationErrorTriggered(
+    ValidationErrorTriggered event,
+    Emitter<AuthState> emit,
+  ) {
+    if (state is AuthUnauthenticated) {
+      emit(AuthUnauthenticated(
+        obscurePassword: state.obscurePassword,
+        showValidationError: true,
+      ));
+    } else if (state is AuthError) {
+      final currentState = state as AuthError;
+      emit(AuthError(
+        currentState.message,
+        obscurePassword: state.obscurePassword,
+        showValidationError: true,
+      ));
+    } else {
+      emit(AuthInitial(
+        obscurePassword: state.obscurePassword,
+        showValidationError: true,
+      ));
+    }
+  }
+
+  // NEW: Clear validation error
+  void _onValidationErrorCleared(
+    ValidationErrorCleared event,
+    Emitter<AuthState> emit,
+  ) {
+    if (state is AuthUnauthenticated) {
+      emit(AuthUnauthenticated(
+        obscurePassword: state.obscurePassword,
+        showValidationError: false,
+      ));
+    } else if (state is AuthError) {
+      final currentState = state as AuthError;
+      emit(AuthError(
+        currentState.message,
+        obscurePassword: state.obscurePassword,
+        showValidationError: false,
+      ));
+    } else {
+      emit(AuthInitial(
+        obscurePassword: state.obscurePassword,
+        showValidationError: false,
+      ));
+    }
   }
 }

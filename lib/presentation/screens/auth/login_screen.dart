@@ -10,41 +10,8 @@ import '../../widgets/shake_widget.dart';
 import '../home/home_screen.dart';
 import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _showError = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleLogin() {
-    setState(() => _showError = false);
-    
-    if (_formKey.currentState!.validate()) {
-      context.read<AuthBloc>().add(
-            AuthSignInRequested(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
-    } else {
-      setState(() => _showError = true);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (_) => const HomeScreen()),
             );
           } else if (state is AuthError) {
-            setState(() => _showError = true);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -65,119 +31,172 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
         },
-        child: SafeArea(
+        child: const SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  Icon(
-                    Icons.currency_exchange,
-                    size: 60,
-                    color: Theme.of(context).colorScheme.primary,
-                  ).animate().scale(duration: 400.ms),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Welcome Back',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 100.ms)
-                      .slideX(begin: -0.2, end: 0),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign in to continue',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey,
-                        ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 200.ms)
-                      .slideX(begin: -0.2, end: 0),
-                  const SizedBox(height: 48),
-                  ShakeWidget(
-                    shake: _showError,
-                    child: TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: Validators.email,
-                    ),
-                  ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 16),
-                  ShakeWidget(
-                    shake: _showError,
-                    child: TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                          onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
-                          },
-                        ),
-                      ),
-                      validator: Validators.password,
-                    ),
-                  ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 32),
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      return AnimatedButton(
-                        onPressed: _handleLogin,
-                        text: 'Sign In',
-                        isLoading: state is AuthLoading,
-                      );
-                    },
-                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const RegisterScreen(),
-                          ),
-                        );
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          text: "Don't have an account? ",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          children: [
-                            TextSpan(
-                              text: 'Sign Up',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ).animate().fadeIn(delay: 600.ms),
-                ],
-              ),
-            ),
+            padding: EdgeInsets.all(24.0),
+            child: _LoginForm(),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LoginForm extends StatefulWidget {
+  const _LoginForm();
+
+  @override
+  State<_LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<_LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin(BuildContext context) {
+    // Clear validation error
+    context.read<AuthBloc>().add(const ValidationErrorCleared());
+
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthBloc>().add(
+            AuthSignInRequested(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+            ),
+          );
+    } else {
+      // Trigger validation error in BLoC
+      context.read<AuthBloc>().add(const ValidationErrorTriggered());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              Icon(
+                Icons.currency_exchange,
+                size: 60,
+                color: Theme.of(context).colorScheme.primary,
+              ).animate().scale(duration: 400.ms),
+              const SizedBox(height: 24),
+              Text(
+                'Welcome Back',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              )
+                  .animate()
+                  .fadeIn(delay: 100.ms)
+                  .slideX(begin: -0.2, end: 0),
+              const SizedBox(height: 8),
+              Text(
+                'Sign in to continue',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey,
+                    ),
+              )
+                  .animate()
+                  .fadeIn(delay: 200.ms)
+                  .slideX(begin: -0.2, end: 0),
+              const SizedBox(height: 48),
+              
+              ShakeWidget(
+                shake: state.showValidationError, 
+                child: TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  validator: Validators.email,
+                ),
+              ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
+              
+              const SizedBox(height: 16),
+              
+              ShakeWidget(
+                shake: state.showValidationError, 
+                child: TextFormField(
+                  controller: _passwordController,
+                  obscureText: state.obscurePassword, 
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        state.obscurePassword 
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        context.read<AuthBloc>().add(
+                              const PasswordVisibilityToggled(),
+                            );
+                      },
+                    ),
+                  ),
+                  validator: Validators.password,
+                ),
+              ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
+              
+              const SizedBox(height: 32),
+              
+              // Login Button
+              AnimatedButton(
+                onPressed: () => _handleLogin(context),
+                text: 'Sign In',
+                isLoading: state is AuthLoading,
+              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
+              
+              const SizedBox(height: 24),
+              
+              // Sign Up Link
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const RegisterScreen(),
+                      ),
+                    );
+                  },
+                  child: RichText(
+                    text: TextSpan(
+                      text: "Don't have an account? ",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      children: [
+                        TextSpan(
+                          text: 'Sign Up',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).animate().fadeIn(delay: 600.ms),
+            ],
+          ),
+        );
+      },
     );
   }
 }

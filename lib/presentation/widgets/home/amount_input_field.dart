@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:thought_box/presentation/widgets/shake_widget.dart';
 import '../../../core/utils/validators.dart';
+import '../shake_widget.dart';
 
 class AmountInputField extends StatelessWidget {
   final TextEditingController controller;

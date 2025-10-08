@@ -13,6 +13,8 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
     on<CurrencySelected>(_onCurrencySelected);
     on<CurrenciesSwapped>(_onCurrenciesSwapped);
     on<RecentPairSelected>(_onRecentPairSelected);
+    on<ValidationErrorTriggered>(_onValidationErrorTriggered);
+    on<ValidationErrorCleared>(_onValidationErrorCleared);
   }
 
   Future<void> _onConvertRequested(
@@ -150,12 +152,10 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
     }
   }
 
-//check the cache first
   Future<void> _onRecentPairSelected(
     RecentPairSelected event,
     Emitter<ConversionState> emit,
   ) async {
-    // Firsttry to load from cache
     final cachedResult = currencyRepository.getCachedConversionForPair(
       from: event.from,
       to: event.to,
@@ -187,12 +187,10 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
         toCurrency: event.to,
       ));
 
-      final lastAmount = await _getLastAmountForPair(event.from, event.to);
-
       final result = await currencyRepository.convertCurrency(
         from: event.from,
         to: event.to,
-        amount: lastAmount,
+        amount: 100.0,
       );
 
       result.fold(
@@ -214,7 +212,79 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
     }
   }
 
-  Future<double> _getLastAmountForPair(String from, String to) async {
-    return 100.0; 
+  void _onValidationErrorTriggered(
+    ValidationErrorTriggered event,
+    Emitter<ConversionState> emit,
+  ) {
+    if (state is ConversionSuccess) {
+      final currentState = state as ConversionSuccess;
+      emit(ConversionSuccess(
+        response: currentState.response,
+        recentPairs: currentState.recentPairs,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: true,
+      ));
+    } else if (state is ConversionWithRecent) {
+      final currentState = state as ConversionWithRecent;
+      emit(ConversionWithRecent(
+        currentState.recentPairs,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: true,
+      ));
+    } else if (state is ConversionError) {
+      final currentState = state as ConversionError;
+      emit(ConversionError(
+        currentState.message,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: true,
+      ));
+    } else {
+      emit(ConversionInitial(
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: true,
+      ));
+    }
+  }
+
+  void _onValidationErrorCleared(
+    ValidationErrorCleared event,
+    Emitter<ConversionState> emit,
+  ) {
+    if (state is ConversionSuccess) {
+      final currentState = state as ConversionSuccess;
+      emit(ConversionSuccess(
+        response: currentState.response,
+        recentPairs: currentState.recentPairs,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: false,
+      ));
+    } else if (state is ConversionWithRecent) {
+      final currentState = state as ConversionWithRecent;
+      emit(ConversionWithRecent(
+        currentState.recentPairs,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: false,
+      ));
+    } else if (state is ConversionError) {
+      final currentState = state as ConversionError;
+      emit(ConversionError(
+        currentState.message,
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: false,
+      ));
+    } else {
+      emit(ConversionInitial(
+        fromCurrency: state.fromCurrency,
+        toCurrency: state.toCurrency,
+        showValidationError: false,
+      ));
+    }
   }
 }

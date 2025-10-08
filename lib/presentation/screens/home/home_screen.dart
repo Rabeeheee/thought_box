@@ -1,25 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:thought_box/presentation/widgets/amount_input_field.dart';
-import 'package:thought_box/presentation/widgets/conversion_result_section.dart';
-import 'package:thought_box/presentation/widgets/currency_selection_row.dart';
-import 'package:thought_box/presentation/widgets/recent_pairs_list.dart';
 import '../../../data/models/currency_model.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_event.dart' hide ValidationErrorTriggered, ValidationErrorCleared;
 import '../../blocs/conversion/conversion_bloc.dart';
 import '../../blocs/conversion/conversion_event.dart';
 import '../../blocs/conversion/conversion_state.dart';
 import '../../widgets/animated_button.dart';
+import '../../widgets/confirmation_dialog.dart';
+import '../../widgets/home/amount_input_field.dart';
+import '../../widgets/home/conversion_result_section.dart';
+import '../../widgets/home/currency_selection_row.dart';
+import '../../widgets/home/recent_pairs_list.dart';
 import '../auth/login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Logout',
+      message: 'Are you sure you want to logout?\n\nAll cached data will be cleared.',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      icon: Icons.logout,
+      iconColor: Colors.red,
+    );
+
+    if (confirmed == true && context.mounted) {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Logging out...'),
+                  SizedBox(height: 4),
+                  Text(
+                    'Clearing cache data',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      context.read<AuthBloc>().add(AuthSignOutRequested());
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('Logged out successfully'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Load recent pairs on first build
     context.read<ConversionBloc>().add(LoadRecentPairs());
 
     return Scaffold(
@@ -28,12 +97,8 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(AuthSignOutRequested());
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            },
+            tooltip: 'Logout',
+            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
@@ -57,7 +122,6 @@ class _HomeContent extends StatefulWidget {
 class _HomeContentState extends State<_HomeContent> {
   final _amountController = TextEditingController(text: '100');
   final _formKey = GlobalKey<FormState>();
-  bool _showError = false;
 
   @override
   void dispose() {
@@ -65,9 +129,10 @@ class _HomeContentState extends State<_HomeContent> {
     super.dispose();
   }
 
-  void _handleConvert(String from, String to) {
+  void _handleConvert(BuildContext context, String from, String to) {
+    context.read<ConversionBloc>().add(const ValidationErrorCleared());
+
     if (_formKey.currentState!.validate()) {
-      setState(() => _showError = false);
       final amount = double.parse(_amountController.text);
       context.read<ConversionBloc>().add(
             ConvertCurrencyRequested(
@@ -77,11 +142,11 @@ class _HomeContentState extends State<_HomeContent> {
             ),
           );
     } else {
-      setState(() => _showError = true);
+      context.read<ConversionBloc>().add(const ValidationErrorTriggered());
     }
   }
 
-  void _handleSwap(String from, String to) {
+  void _handleSwap(BuildContext context, String from, String to) {
     if (_amountController.text.isNotEmpty &&
         _formKey.currentState!.validate()) {
       final amount = double.parse(_amountController.text);
@@ -114,49 +179,36 @@ class _HomeContentState extends State<_HomeContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Recent Pairs
-             RecentPairsList(
-  recentPairs: recentPairs,
-),
-
-              // Currency Selection
+              RecentPairsList(recentPairs: recentPairs),
               CurrencySelectionRow(
                 fromCurrency: fromCurrency,
                 toCurrency: toCurrency,
               ),
-
               const SizedBox(height: 24),
-
-              // Amount Input
               AmountInputField(
                 controller: _amountController,
                 currencyCode: fromCurrency.code,
-                showError: _showError,
+                showError: state.showValidationError,
               ),
-
               const SizedBox(height: 24),
-
-              // Convert Button
               AnimatedButton(
                 onPressed: () => _handleConvert(
+                  context,
                   state.fromCurrency,
                   state.toCurrency,
                 ),
                 text: 'Convert',
                 isLoading: state is ConversionLoading,
               ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-
               const SizedBox(height: 24),
-
-              // Result
               ConversionResultSection(
                 isLoading: state is ConversionLoading,
                 response: state is ConversionSuccess ? state.response : null,
-                errorMessage:
-                    state is ConversionError ? state.message : null,
+                errorMessage: state is ConversionError ? state.message : null,
                 fromCurrency: fromCurrency,
                 toCurrency: toCurrency,
                 onSwap: () => _handleSwap(
+                  context,
                   state.fromCurrency,
                   state.toCurrency,
                 ),

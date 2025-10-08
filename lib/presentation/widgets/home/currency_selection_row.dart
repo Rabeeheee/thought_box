@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thought_box/presentation/blocs/conversion/conversion_bloc.dart';
 import 'package:thought_box/presentation/blocs/conversion/conversion_event.dart';
 import 'package:thought_box/presentation/widgets/currency_picker.dart';
-import '../../../data/models/currency_model.dart';
+import '../../../../data/models/currency_model.dart';
 import 'currency_chip.dart';
 
 class CurrencySelectionRow extends StatelessWidget {

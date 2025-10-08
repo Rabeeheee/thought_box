@@ -3,8 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:thought_box/presentation/screens/trend/trend_screen.dart';
 import 'package:thought_box/presentation/widgets/result_card.dart';
 import 'package:thought_box/presentation/widgets/shimmer_loading.dart';
-import '../../../data/models/conversion_response.dart';
-import '../../../data/models/currency_model.dart';
+import '../../../../data/models/conversion_response.dart';
+import '../../../../data/models/currency_model.dart';
 
 class ConversionResultSection extends StatelessWidget {
   final bool isLoading;

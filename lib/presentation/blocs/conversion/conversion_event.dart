@@ -56,7 +56,6 @@ class CurrenciesSwapped extends ConversionEvent {
   const CurrenciesSwapped();
 }
 
-// NEW: Load cached conversion from recent pair
 class RecentPairSelected extends ConversionEvent {
   final String from;
   final String to;
@@ -68,4 +67,12 @@ class RecentPairSelected extends ConversionEvent {
 
   @override
   List<Object> get props => [from, to];
+}
+
+class ValidationErrorTriggered extends ConversionEvent {
+  const ValidationErrorTriggered();
+}
+
+class ValidationErrorCleared extends ConversionEvent {
+  const ValidationErrorCleared();
 }

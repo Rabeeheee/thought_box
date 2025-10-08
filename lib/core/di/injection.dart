@@ -28,8 +28,12 @@ Future<void> setupDependencies() async {
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(getIt()),
+    () => AuthRepositoryImpl(
+      firebaseAuth: getIt(),
+      cacheManager: getIt(), // ← Pass CacheManager
+    ),
   );
+  
   getIt.registerLazySingleton<CurrencyRepository>(
     () => CurrencyRepositoryImpl(
       currencyApi: getIt(),

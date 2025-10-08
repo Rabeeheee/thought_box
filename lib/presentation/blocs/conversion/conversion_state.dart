@@ -4,20 +4,23 @@ import '../../../data/models/conversion_response.dart';
 abstract class ConversionState extends Equatable {
   final String fromCurrency;
   final String toCurrency;
+  final bool showValidationError; // NEW
 
   const ConversionState({
     this.fromCurrency = 'USD',
     this.toCurrency = 'EUR',
+    this.showValidationError = false, // NEW
   });
 
   @override
-  List<Object?> get props => [fromCurrency, toCurrency];
+  List<Object?> get props => [fromCurrency, toCurrency, showValidationError];
 }
 
 class ConversionInitial extends ConversionState {
   const ConversionInitial({
     super.fromCurrency,
     super.toCurrency,
+    super.showValidationError,
   });
 }
 
@@ -25,6 +28,7 @@ class ConversionLoading extends ConversionState {
   const ConversionLoading({
     required super.fromCurrency,
     required super.toCurrency,
+    super.showValidationError = false,
   });
 }
 
@@ -37,10 +41,17 @@ class ConversionSuccess extends ConversionState {
     this.recentPairs = const [],
     required super.fromCurrency,
     required super.toCurrency,
+    super.showValidationError = false,
   });
 
   @override
-  List<Object?> get props => [response, recentPairs, fromCurrency, toCurrency];
+  List<Object?> get props => [
+        response,
+        recentPairs,
+        fromCurrency,
+        toCurrency,
+        showValidationError,
+      ];
 }
 
 class ConversionError extends ConversionState {
@@ -50,10 +61,16 @@ class ConversionError extends ConversionState {
     this.message, {
     required super.fromCurrency,
     required super.toCurrency,
+    super.showValidationError = false,
   });
 
   @override
-  List<Object?> get props => [message, fromCurrency, toCurrency];
+  List<Object?> get props => [
+        message,
+        fromCurrency,
+        toCurrency,
+        showValidationError,
+      ];
 }
 
 class ConversionWithRecent extends ConversionState {
@@ -63,8 +80,14 @@ class ConversionWithRecent extends ConversionState {
     this.recentPairs, {
     required super.fromCurrency,
     required super.toCurrency,
+    super.showValidationError = false,
   });
 
   @override
-  List<Object?> get props => [recentPairs, fromCurrency, toCurrency];
+  List<Object?> get props => [
+        recentPairs,
+        fromCurrency,
+        toCurrency,
+        showValidationError,
+      ];
 }

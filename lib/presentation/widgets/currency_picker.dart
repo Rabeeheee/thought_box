@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/currency_data.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:thought_box/presentation/blocs/currency/currency_picker_bloc.dart';
+import 'package:thought_box/presentation/blocs/currency/currency_picker_event.dart';
+import 'package:thought_box/presentation/blocs/currency/currency_picker_state.dart';
 import '../../data/models/currency_model.dart';
 
-class CurrencyPicker extends StatefulWidget {
+
+class CurrencyPicker extends StatelessWidget {
   final Function(CurrencyModel) onSelected;
   final String? selectedCode;
 
@@ -13,31 +17,40 @@ class CurrencyPicker extends StatefulWidget {
   });
 
   @override
-  State<CurrencyPicker> createState() => _CurrencyPickerState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => CurrencyPickerBloc()..add(const CurrencyPickerInitialized()),
+      child: _CurrencyPickerContent(
+        onSelected: onSelected,
+        selectedCode: selectedCode,
+      ),
+    );
+  }
 }
 
-class _CurrencyPickerState extends State<CurrencyPicker> {
-  final TextEditingController _searchController = TextEditingController();
-  List<CurrencyModel> _currencies = [];
-  List<CurrencyModel> _filteredCurrencies = [];
+class _CurrencyPickerContent extends StatefulWidget {
+  final Function(CurrencyModel) onSelected;
+  final String? selectedCode;
+
+  const _CurrencyPickerContent({
+    required this.onSelected,
+    this.selectedCode,
+  });
+
+  @override
+  State<_CurrencyPickerContent> createState() => _CurrencyPickerContentState();
+}
+
+class _CurrencyPickerContentState extends State<_CurrencyPickerContent> {
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _currencies = CurrencyData.currencyCodes
-        .map((code) => CurrencyModel.fromCode(code))
-        .toList();
-    _filteredCurrencies = _currencies;
-    _searchController.addListener(_filterCurrencies);
-  }
-
-  void _filterCurrencies() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredCurrencies = _currencies.where((currency) {
-        return currency.code.toLowerCase().contains(query) ||
-            currency.name.toLowerCase().contains(query);
-      }).toList();
+    _searchController.addListener(() {
+      context.read<CurrencyPickerBloc>().add(
+            SearchQueryChanged(_searchController.text),
+          );
     });
   }
 
@@ -89,38 +102,75 @@ class _CurrencyPickerState extends State<CurrencyPicker> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _filteredCurrencies.length,
-              itemBuilder: (context, index) {
-                final currency = _filteredCurrencies[index];
-                final isSelected = currency.code == widget.selectedCode;
-                
-                return ListTile(
-                  leading: Hero(
-                    tag: 'currency_${currency.code}',
-                    child: CircleAvatar(
-                      backgroundColor: Colors.transparent,
-                      child: Text(
-                        currency.flag,
-                        style: const TextStyle(fontSize: 24),
-                      ),
+            child: BlocBuilder<CurrencyPickerBloc, CurrencyPickerState>(
+              builder: (context, state) {
+                final currencies = state.filteredCurrencies;
+
+                if (currencies.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No currencies found',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Try a different search term',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  title: Text(
-                    currency.code,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(currency.name),
-                  trailing: isSelected
-                      ? Icon(
-                          Icons.check_circle,
-                          color: Theme.of(context).colorScheme.primary,
-                        )
-                      : null,
-                  selected: isSelected,
-                  onTap: () {
-                    widget.onSelected(currency);
-                    Navigator.pop(context);
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: currencies.length,
+                  itemBuilder: (context, index) {
+                    final currency = currencies[index];
+                    final isSelected = currency.code == widget.selectedCode;
+
+                    return ListTile(
+                      leading: Hero(
+                        tag: 'currency_${currency.code}',
+                        child: CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          child: Text(
+                            currency.flag,
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        currency.code,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(currency.name),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                      selected: isSelected,
+                      onTap: () {
+                        widget.onSelected(currency);
+                        Navigator.pop(context);
+                      },
+                    );
                   },
                 );
               },

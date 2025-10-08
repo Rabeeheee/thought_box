@@ -36,3 +36,16 @@ class AuthSignUpRequested extends AuthEvent {
 }
 
 class AuthSignOutRequested extends AuthEvent {}
+
+// NEW: UI State Events
+class PasswordVisibilityToggled extends AuthEvent {
+  const PasswordVisibilityToggled();
+}
+
+class ValidationErrorTriggered extends AuthEvent {
+  const ValidationErrorTriggered();
+}
+
+class ValidationErrorCleared extends AuthEvent {
+  const ValidationErrorCleared();
+}

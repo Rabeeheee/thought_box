@@ -1,10 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/currency_model.dart';
+import '../../blocs/trend/trend_bloc.dart';
+import '../../blocs/trend/trend_event.dart';
+import '../../blocs/trend/trend_state.dart';
 
-class TrendScreen extends StatefulWidget {
+class TrendScreen extends StatelessWidget {
   final CurrencyModel fromCurrency;
   final CurrencyModel toCurrency;
 
@@ -15,52 +18,72 @@ class TrendScreen extends StatefulWidget {
   });
 
   @override
-  State<TrendScreen> createState() => _TrendScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TrendBloc()
+        ..add(TrendInitialized(
+          fromCurrency: fromCurrency.code,
+          toCurrency: toCurrency.code,
+        )),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('${fromCurrency.code} → ${toCurrency.code}'),
+        ),
+        body: const SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: _TrendContent(),
+        ),
+      ),
+    );
+  }
 }
 
-class _TrendScreenState extends State<TrendScreen> {
-  int? _selectedIndex;
-  
-  // Mock data for 5 days
-  late List<FlSpot> _spots;
-  late List<String> _dates;
-  late double _minRate;
-  late double _maxRate;
-  late double _avgRate;
+class _TrendContent extends StatelessWidget {
+  const _TrendContent();
 
-  @override
-  void initState() {
-    super.initState();
-    _generateMockData();
-  }
-
-  void _generateMockData() {
-    final baseRate = 1.5 + (widget.fromCurrency.code.hashCode % 10) / 10;
-    _spots = List.generate(5, (index) {
-      final variation = (index - 2) * 0.05;
-      return FlSpot(index.toDouble(), baseRate + variation);
-    });
-
-    _dates = List.generate(5, (index) {
-      final date = DateTime.now().subtract(Duration(days: 4 - index));
-      return DateFormat('MMM dd').format(date);
-    });
-
-    final rates = _spots.map((spot) => spot.y).toList();
-    _minRate = rates.reduce((a, b) => a < b ? a : b);
-    _maxRate = rates.reduce((a, b) => a > b ? a : b);
-    _avgRate = rates.reduce((a, b) => a + b) / rates.length;
+  Widget _buildStatCard({
+    required BuildContext context,
+    required String label,
+    required String value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.fromCurrency.code} → ${widget.toCurrency.code}'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return BlocBuilder<TrendBloc, TrendState>(
+      builder: (context, state) {
+        if (state.spots.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -69,7 +92,6 @@ class _TrendScreenState extends State<TrendScreen> {
                     fontWeight: FontWeight.bold,
                   ),
             ).animate().fadeIn().slideX(begin: -0.2),
-            
             const SizedBox(height: 24),
 
             // Statistics Cards
@@ -77,28 +99,31 @@ class _TrendScreenState extends State<TrendScreen> {
               children: [
                 Expanded(
                   child: _buildStatCard(
-                    'Min',
-                    _minRate.toStringAsFixed(4),
-                    Colors.red,
-                    Icons.arrow_downward,
+                    context: context,
+                    label: 'Min',
+                    value: state.minRate.toStringAsFixed(4),
+                    color: Colors.red,
+                    icon: Icons.arrow_downward,
                   ).animate().fadeIn(delay: 100.ms).scale(),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    'Avg',
-                    _avgRate.toStringAsFixed(4),
-                    Colors.blue,
-                    Icons.show_chart,
+                    context: context,
+                    label: 'Avg',
+                    value: state.avgRate.toStringAsFixed(4),
+                    color: Colors.blue,
+                    icon: Icons.show_chart,
                   ).animate().fadeIn(delay: 200.ms).scale(),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    'Max',
-                    _maxRate.toStringAsFixed(4),
-                    Colors.green,
-                    Icons.arrow_upward,
+                    context: context,
+                    label: 'Max',
+                    value: state.maxRate.toStringAsFixed(4),
+                    color: Colors.green,
+                    icon: Icons.arrow_upward,
                   ).animate().fadeIn(delay: 300.ms).scale(),
                 ),
               ],
@@ -156,11 +181,12 @@ class _TrendScreenState extends State<TrendScreen> {
                                 reservedSize: 30,
                                 interval: 1,
                                 getTitlesWidget: (double value, TitleMeta meta) {
-                                  if (value.toInt() >= 0 && value.toInt() < _dates.length) {
+                                  if (value.toInt() >= 0 &&
+                                      value.toInt() < state.dates.length) {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
-                                        _dates[value.toInt()],
+                                        state.dates[value.toInt()],
                                         style: const TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
@@ -197,11 +223,11 @@ class _TrendScreenState extends State<TrendScreen> {
                           ),
                           minX: 0,
                           maxX: 4,
-                          minY: _minRate - 0.1,
-                          maxY: _maxRate + 0.1,
+                          minY: state.minRate - 0.1,
+                          maxY: state.maxRate + 0.1,
                           lineBarsData: [
                             LineChartBarData(
-                              spots: _spots,
+                              spots: state.spots,
                               isCurved: true,
                               gradient: LinearGradient(
                                 colors: [
@@ -215,7 +241,7 @@ class _TrendScreenState extends State<TrendScreen> {
                                 show: true,
                                 getDotPainter: (spot, percent, barData, index) {
                                   return FlDotCirclePainter(
-                                    radius: _selectedIndex == index ? 6 : 4,
+                                    radius: state.selectedIndex == index ? 6 : 4,
                                     color: Theme.of(context).colorScheme.primary,
                                     strokeWidth: 2,
                                     strokeColor: Colors.white,
@@ -226,8 +252,14 @@ class _TrendScreenState extends State<TrendScreen> {
                                 show: true,
                                 gradient: LinearGradient(
                                   colors: [
-                                    Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                    Theme.of(context).colorScheme.primary.withOpacity(0.0),
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.3),
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.0),
                                   ],
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
@@ -238,17 +270,20 @@ class _TrendScreenState extends State<TrendScreen> {
                           lineTouchData: LineTouchData(
                             enabled: true,
                             touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
-                              if (response != null && response.lineBarSpots != null) {
-                                setState(() {
-                                  _selectedIndex = response.lineBarSpots!.first.spotIndex;
-                                });
+                              if (response != null &&
+                                  response.lineBarSpots != null) {
+                                context.read<TrendBloc>().add(
+                                      TrendPointSelected(
+                                        response.lineBarSpots!.first.spotIndex,
+                                      ),
+                                    );
                               }
                             },
                             touchTooltipData: LineTouchTooltipData(
                               getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                                 return touchedBarSpots.map((barSpot) {
                                   return LineTooltipItem(
-                                    '${_dates[barSpot.x.toInt()]}\n${barSpot.y.toStringAsFixed(4)}',
+                                    '${state.dates[barSpot.x.toInt()]}\n${barSpot.y.toStringAsFixed(4)}',
                                     const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -291,34 +326,8 @@ class _TrendScreenState extends State<TrendScreen> {
               ),
             ).animate().fadeIn(delay: 500.ms),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, Color color, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

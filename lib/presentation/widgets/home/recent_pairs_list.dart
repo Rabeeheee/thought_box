@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thought_box/presentation/blocs/conversion/conversion_bloc.dart';
 import 'package:thought_box/presentation/blocs/conversion/conversion_event.dart';
-import '../../../core/constants/currency_data.dart';
+import '../../../../core/constants/currency_data.dart';
 
 
 class RecentPairsList extends StatelessWidget {
