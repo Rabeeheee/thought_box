@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "248513561291",
+    "project_id": "currency-6731f",
+    "storage_bucket": "currency-6731f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248513561291:android:5c7d0af89524ca371a114e",
+        "android_client_info": {
+          "package_name": "com.example.thought_box"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACARfD-QeIagwz6poyl1GhBZb2QZLjBpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
