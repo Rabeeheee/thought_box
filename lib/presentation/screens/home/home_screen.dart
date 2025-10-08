@@ -115,10 +115,9 @@ class _HomeContentState extends State<_HomeContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Recent Pairs
-              RecentPairsList(
-                recentPairs: recentPairs,
-                amount: double.tryParse(_amountController.text) ?? 100,
-              ),
+             RecentPairsList(
+  recentPairs: recentPairs,
+),
 
               // Currency Selection
               CurrencySelectionRow(

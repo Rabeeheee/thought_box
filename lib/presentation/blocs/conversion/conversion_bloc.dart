@@ -12,6 +12,7 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
     on<LoadRecentPairs>(_onLoadRecentPairs);
     on<CurrencySelected>(_onCurrencySelected);
     on<CurrenciesSwapped>(_onCurrenciesSwapped);
+    on<RecentPairSelected>(_onRecentPairSelected);
   }
 
   Future<void> _onConvertRequested(
@@ -147,5 +148,73 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
         toCurrency: state.fromCurrency,
       ));
     }
+  }
+
+//check the cache first
+  Future<void> _onRecentPairSelected(
+    RecentPairSelected event,
+    Emitter<ConversionState> emit,
+  ) async {
+    // Firsttry to load from cache
+    final cachedResult = currencyRepository.getCachedConversionForPair(
+      from: event.from,
+      to: event.to,
+    );
+
+    if (cachedResult != null) {
+      cachedResult.fold(
+        (failure) {
+          emit(ConversionError(
+            failure.message,
+            fromCurrency: event.from,
+            toCurrency: event.to,
+          ));
+        },
+        (response) {
+          final recentPairs = currencyRepository.getRecentPairs();
+          emit(ConversionSuccess(
+            response: response,
+            recentPairs: recentPairs,
+            fromCurrency: event.from,
+            toCurrency: event.to,
+          ));
+          print('✅ Showed cached conversion offline!');
+        },
+      );
+    } else {
+      emit(ConversionLoading(
+        fromCurrency: event.from,
+        toCurrency: event.to,
+      ));
+
+      final lastAmount = await _getLastAmountForPair(event.from, event.to);
+
+      final result = await currencyRepository.convertCurrency(
+        from: event.from,
+        to: event.to,
+        amount: lastAmount,
+      );
+
+      result.fold(
+        (failure) => emit(ConversionError(
+          '${failure.message}\nNo offline data available.',
+          fromCurrency: event.from,
+          toCurrency: event.to,
+        )),
+        (response) {
+          final recentPairs = currencyRepository.getRecentPairs();
+          emit(ConversionSuccess(
+            response: response,
+            recentPairs: recentPairs,
+            fromCurrency: event.from,
+            toCurrency: event.to,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<double> _getLastAmountForPair(String from, String to) async {
+    return 100.0; 
   }
 }

@@ -22,7 +22,7 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
     required double amount,
   }) async {
     try {
-      // Try cache first
+      // TRY CACHE FIRST
       final cached = cacheManager.getCachedConversion(
         from: from,
         to: to,
@@ -30,17 +30,19 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
       );
       
       if (cached != null) {
+        print('✅ Using cached data for $from → $to ($amount)');
         return Right(ConversionResponse.fromJson(cached));
       }
 
-      // Fetch from API=--=
+      print('⚠️ No cache, fetching from API...');
+      
+      // FETCH FROM API
       final response = await currencyApi.convertCurrency(
         from: from,
         to: to,
         amount: amount,
       );
 
-      // Cache the response---
       await cacheManager.cacheConversion(
         from: from,
         to: to,
@@ -48,7 +50,7 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
         data: response.toJson(),
       );
 
-      // Save to recent pairs==
+      // SAVE to recennt 
       await cacheManager.saveRecentPair(from, to);
 
       return Right(response);
@@ -62,7 +64,35 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
   }
 
   @override
+  Either<Failure, ConversionResponse>? getCachedConversionForPair({
+    required String from,
+    required String to,
+  }) {
+    try {
+      final lastData = cacheManager.getLastConversionForPair(
+        from: from,
+        to: to,
+      );
+      
+      if (lastData != null) {
+        print('✅ Found cached conversion for $from → $to');
+        return Right(ConversionResponse.fromJson(lastData['data']));
+      }
+      
+      print('⚠️ No cached conversion for $from → $to');
+      return null;
+    } catch (e) {
+      return Left(CacheFailure('Failed to load cached data'));
+    }
+  }
+
+  @override
   List<String> getRecentPairs() {
     return cacheManager.getRecentPairs();
+  }
+
+  @override
+  List<Map<String, dynamic>> getRecentPairsWithData() {
+    return cacheManager.getRecentPairsWithData();
   }
 }

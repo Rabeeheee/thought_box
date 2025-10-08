@@ -9,5 +9,14 @@ abstract class CurrencyRepository {
     required double amount,
   });
   
+  // NEW: Get cached conversion for recent pair
+  Either<Failure, ConversionResponse>? getCachedConversionForPair({
+    required String from,
+    required String to,
+  });
+  
   List<String> getRecentPairs();
+  
+  // NEW: Get recent pairs with data
+  List<Map<String, dynamic>> getRecentPairsWithData();
 }

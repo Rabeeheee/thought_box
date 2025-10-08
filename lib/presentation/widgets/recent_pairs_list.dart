@@ -5,14 +5,13 @@ import 'package:thought_box/presentation/blocs/conversion/conversion_bloc.dart';
 import 'package:thought_box/presentation/blocs/conversion/conversion_event.dart';
 import '../../../core/constants/currency_data.dart';
 
+
 class RecentPairsList extends StatelessWidget {
   final List<String> recentPairs;
-  final double amount;
 
   const RecentPairsList({
     super.key,
     required this.recentPairs,
-    required this.amount,
   });
 
   @override
@@ -36,6 +35,8 @@ class RecentPairsList extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(width: 8),
+            
           ],
         ),
         const SizedBox(height: 12),
@@ -51,25 +52,10 @@ class RecentPairsList extends StatelessWidget {
                 avatar: Text(CurrencyData.currencies[pair[0]]?['flag'] ?? ''),
                 label: Text('${pair[0]} → ${pair[1]}'),
                 onPressed: () {
-                  // Update currencies in BLoC
                   context.read<ConversionBloc>().add(
-                        CurrencySelected(
-                          currencyCode: pair[0],
-                          isFrom: true,
-                        ),
-                      );
-                  context.read<ConversionBloc>().add(
-                        CurrencySelected(
-                          currencyCode: pair[1],
-                          isFrom: false,
-                        ),
-                      );
-                  // Trigger conversion
-                  context.read<ConversionBloc>().add(
-                        ConvertCurrencyRequested(
+                        RecentPairSelected(
                           from: pair[0],
                           to: pair[1],
-                          amount: amount,
                         ),
                       );
                 },
@@ -77,7 +63,8 @@ class RecentPairsList extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
+        
       ],
     );
   }
