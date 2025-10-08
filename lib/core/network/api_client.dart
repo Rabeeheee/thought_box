@@ -20,7 +20,6 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // Add access key to all requests
           options.queryParameters['access_key'] = EnvConfig.accessKey;
           print('REQUEST[${options.method}] => PATH: ${options.path}');
           return handler.next(options);

@@ -38,3 +38,39 @@ class SwapCurrenciesRequested extends ConversionEvent {
 }
 
 class LoadRecentPairs extends ConversionEvent {}
+
+// NEW EVENTS
+class FromCurrencyChanged extends ConversionEvent {
+  final String currencyCode;
+
+  const FromCurrencyChanged(this.currencyCode);
+
+  @override
+  List<Object> get props => [currencyCode];
+}
+
+class ToCurrencyChanged extends ConversionEvent {
+  final String currencyCode;
+
+  const ToCurrencyChanged(this.currencyCode);
+
+  @override
+  List<Object> get props => [currencyCode];
+}
+
+class CurrenciesSwapped extends ConversionEvent {}
+
+class RecentPairSelected extends ConversionEvent {
+  final String from;
+  final String to;
+  final double amount;
+
+  const RecentPairSelected({
+    required this.from,
+    required this.to,
+    required this.amount,
+  });
+
+  @override
+  List<Object> get props => [from, to, amount];
+}

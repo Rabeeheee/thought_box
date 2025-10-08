@@ -10,13 +10,32 @@ import 'presentation/screens/splash/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
-  
-  // Setup dependencies
-  await setupDependencies();
-  
-  runApp(const MyApp());
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp();
+    
+    // Setup dependencies
+    await setupDependencies();
+    
+    runApp(const MyApp());
+  } catch (e) {
+    print('❌ Initialization Error: $e');
+    // Run app anyway with error screen
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, size: 60, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Failed to initialize app\n$e'),
+            ],
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -45,7 +45,7 @@ class ConversionResult extends Equatable {
   });
 
   factory ConversionResult.fromJson(Map<String, dynamic> json) {
-    // The API returns a map with the currency code as key
+    // RETURNS a map with the currency code as key
     final toCurrency = json.keys.firstWhere((key) => key != 'rate');
     return ConversionResult(
       rate: (json['rate'] as num).toDouble(),

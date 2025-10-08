@@ -3,12 +3,12 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thought_box/data/repositories/auth_repository.dart';
 import 'package:thought_box/data/repositories/currency_repository.dart';
-import 'package:thought_box/presentation/blocs/auth/auth_bloc.dart';
-import 'package:thought_box/presentation/blocs/conversion/conversion_bloc.dart';
 import '../../data/datasources/local/cache_manager.dart';
 import '../../data/datasources/remote/currency_api.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/currency_repository_impl.dart';
+import '../../presentation/blocs/auth/auth_bloc.dart';
+import '../../presentation/blocs/conversion/conversion_bloc.dart';
 import '../network/api_client.dart';
 
 final getIt = GetIt.instance;

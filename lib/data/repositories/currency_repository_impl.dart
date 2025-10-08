@@ -33,14 +33,14 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
         return Right(ConversionResponse.fromJson(cached));
       }
 
-      // Fetch from API
+      // Fetch from API=--=
       final response = await currencyApi.convertCurrency(
         from: from,
         to: to,
         amount: amount,
       );
 
-      // Cache the response
+      // Cache the response---
       await cacheManager.cacheConversion(
         from: from,
         to: to,
@@ -48,7 +48,7 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
         data: response.toJson(),
       );
 
-      // Save to recent pairs
+      // Save to recent pairs==
       await cacheManager.saveRecentPair(from, to);
 
       return Right(response);

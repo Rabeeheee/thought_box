@@ -1,38 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:thought_box/presentation/screens/auth/login_screen.dart';
-import 'package:thought_box/presentation/screens/home/home_screen.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../auth/login_screen.dart';
+import '../home/home_screen.dart';
 
-
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<AuthBloc>().add(AuthCheckRequested());
+  void _initializeApp(BuildContext context) async {
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // CHECK AUTH STATUS
+    if (context.mounted) {
+      context.read<AuthBloc>().add(AuthCheckRequested());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    //TRIGERING INITIALIZATION
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeApp(context);
+    });
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => 
+                  const HomeScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 500),
+            ),
           );
         } else if (state is AuthUnauthenticated) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => 
+                  const LoginScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 500),
+            ),
           );
         }
       },

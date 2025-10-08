@@ -56,27 +56,27 @@ class AuthRepositoryImpl implements AuthRepository {
   Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
 
   String _mapFirebaseError(String code) {
-  switch (code) {
-    case 'user-not-found':
-      return 'No account found with this email. Please sign up first.';
-    case 'wrong-password':
-      return 'Incorrect password. Please try again.';
-    case 'email-already-in-use':
-      return 'An account already exists with this email';
-    case 'invalid-email':
-      return 'Invalid email address';
-    case 'weak-password':
-      return 'Password must be at least 6 characters';
-    case 'invalid-credential':
-      return 'Invalid email or password. Please check and try again.';
-    case 'user-disabled':
-      return 'This account has been disabled';
-    case 'too-many-requests':
-      return 'Too many failed attempts. Please try again later.';
-    case 'network-request-failed':
-      return 'Network error. Please check your internet connection.';
-    default:
-      return 'Authentication failed: $code';
+    switch (code) {
+      case 'user-not-found':
+        return 'No account found with this email. Please sign up first.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'email-already-in-use':
+        return 'An account already exists with this email';
+      case 'invalid-email':
+        return 'Invalid email address';
+      case 'weak-password':
+        return 'Password must be at least 6 characters';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please check and try again.';
+      case 'user-disabled':
+        return 'This account has been disabled';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'Authentication failed: $code';
+    }
   }
-}
 }

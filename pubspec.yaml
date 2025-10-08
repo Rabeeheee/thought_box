@@ -47,7 +47,6 @@ dependencies:
   flutter_dotenv: ^6.0.0
   get_it: ^8.2.0
   intl: ^0.20.2
-  lottie: ^3.3.2
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
 
