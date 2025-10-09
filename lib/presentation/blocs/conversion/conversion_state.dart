@@ -83,7 +83,7 @@ class ConversionWithRecent extends ConversionState {
     super.showValidationError = false,
   });
 
-  @override
+   @override
   List<Object?> get props => [
         recentPairs,
         fromCurrency,

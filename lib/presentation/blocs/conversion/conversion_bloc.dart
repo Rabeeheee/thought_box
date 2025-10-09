@@ -218,7 +218,7 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
   ) {
     if (state is ConversionSuccess) {
       final currentState = state as ConversionSuccess;
-      emit(ConversionSuccess(
+       emit(ConversionSuccess(
         response: currentState.response,
         recentPairs: currentState.recentPairs,
         fromCurrency: state.fromCurrency,

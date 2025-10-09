@@ -10,7 +10,7 @@ abstract class ConversionEvent extends Equatable {
 class ConvertCurrencyRequested extends ConversionEvent {
   final String from;
   final String to;
-  final double amount;
+   final double amount;
 
   const ConvertCurrencyRequested({
     required this.from,

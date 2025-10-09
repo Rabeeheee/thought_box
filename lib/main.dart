@@ -11,16 +11,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // Initialize Firebase
     await Firebase.initializeApp();
     
-    // Setup dependencies
     await setupDependencies();
     
     runApp(const MyApp());
   } catch (e) {
-    print('❌ Initialization Error: $e');
-    // Run app anyway with error screen
     runApp(MaterialApp(
       home: Scaffold(
         body: Center(

@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     'Clearing cache data',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
