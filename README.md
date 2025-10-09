@@ -284,9 +284,9 @@ For the real experience with the API:
 
 ## Screenshots
 
-![login](https://github.com/user-attachments/assets/6a13250c-40ab-43a1-956f-c9e57ba0cd05)
-![home](https://github.com/user-attachments/assets/8e859622-61b1-48a3-8ca9-7f27c2ac7cd6)
-![trend](https://github.com/user-attachments/assets/969d8850-615a-4833-8230-947319d30257)
+<img src="https://github.com/user-attachments/assets/6a13250c-40ab-43a1-956f-c9e57ba0cd05" alt="Login Screen" width="250"/>
+<img src="https://github.com/user-attachments/assets/8e859622-61b1-48a3-8ca9-7f27c2ac7cd6" alt="Home Screen" width="250"/>
+<img src="https://github.com/user-attachments/assets/969d8850-615a-4833-8230-947319d30257" alt="Trend Screen" width="250"/>
 
 
 ## Contact
