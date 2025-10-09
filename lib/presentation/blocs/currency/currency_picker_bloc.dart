@@ -11,7 +11,7 @@ class CurrencyPickerBloc extends Bloc<CurrencyPickerEvent, CurrencyPickerState> 
       : _allCurrencies = CurrencyData.currencyCodes
             .map((code) => CurrencyModel.fromCode(code))
             .toList(),
-        super(CurrencyPickerInitial(
+         super(CurrencyPickerInitial(
           filteredCurrencies: CurrencyData.currencyCodes
               .map((code) => CurrencyModel.fromCode(code))
               .toList(),

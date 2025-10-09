@@ -12,7 +12,7 @@ class SearchQueryChanged extends CurrencyPickerEvent {
 
   const SearchQueryChanged(this.query);
 
-  @override
+   @override
   List<Object> get props => [query];
 }
 

@@ -21,7 +21,7 @@ class CurrencyPickerInitial extends CurrencyPickerState {
   });
 }
 
-class CurrencyPickerSearching extends CurrencyPickerState {
+ class CurrencyPickerSearching extends CurrencyPickerState {
   const CurrencyPickerSearching({
     required super.filteredCurrencies,
     required super.searchQuery,
