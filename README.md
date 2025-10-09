@@ -1,14 +1,14 @@
-#### CurrencyX - Currency Rate Calculator
+# CurrencyX - Currency Rate Calculator
 
 Hey there! This is a currency converter app I built for the ThoughtBox machine test. It's a fully functional Flutter app with Firebase authentication, smart offline caching, and some nice animations to make it feel polished.
 
-# What does it do?
+## What does it do?
 
 Pretty straightforward - you can convert between different currencies (USD, EUR, GBP, etc.), and the app remembers your recent conversions so you can quickly check them again even when you're offline. There's also a simple chart showing how the exchange rate has changed over the last 5 days (using mock data for now, but it could easily be hooked up to real historical data).
 
 The cool part is that I've focused on making it work well offline. Once you've converted something, it gets cached locally, so if you lose your internet connection, you can still view your recent conversions without any issues.
 
-# Tech Stack
+## Tech Stack
 
 I went with Clean Architecture and BLoC for state management because they're solid patterns for Flutter apps. Here's what I used:
 
@@ -33,7 +33,7 @@ Data Layer (API + Cache)
 
 The presentation layer handles all the UI stuff and user interactions through BLoC. The domain layer defines what the app should do (like "convert currency" or "login user"), and the data layer actually does it by talking to the API or local storage.
 
-# Here's the actual folder structure:
+## Here's the actual folder structure:
 
 ```
 lib/
@@ -50,9 +50,9 @@ Flutter 3.16.0 or newer
 A Firebase project (free tier is fine)
 An internet connection for the first run
 
-# Setup
+## Setup
 
-# 1. Clone and install dependencies
+## 1. Clone and install dependencies
 
 Bash
 ``
@@ -60,7 +60,7 @@ git clone https://github.com/Rabeeheee/thought_box.git
 cd currency-converter
 flutter pub get
 ``
-# 2. Firebase setup
+## 2. Firebase setup
 
 This is probably the most important part. You'll need to:
 
@@ -72,7 +72,7 @@ For iOS (if you need it):
 
 Add an iOS app (bundle ID: com.example.currencyConverter)
 Download GoogleService-Info.plist and put it in ios/Runner/
-# 3. Update your Android build files
+## 3. Update your Android build files
 
 In android/build.gradle, make sure you have:
 
@@ -88,7 +88,7 @@ gradle
 apply plugin: 'com.google.gms.google-services'
 And set the minSdkVersion to at least 21.
 
-# 4. Run it
+## 4. Run it
 
 Bash
 ``
@@ -130,7 +130,7 @@ Cache expires after 30 minutes. You can change this in lib/core/constants/app_co
 static const int cacheTTLMinutes = 30;  
 When you logout, everything gets cleared for privacy.
 
-# Error handling
+## Error handling
 Network stuff can be unreliable, so I've tried to handle errors gracefully:
 
 No internet?
@@ -169,9 +169,9 @@ BLoC emits ConversionSuccess state
 UI rebuilds and shows the animated result card
 If anything fails along the way, it returns Left(failure) instead, and the UI shows an error message.
 
-# Building for production
+## Building for production
 
-# To build an APK:
+### To build an APK:
 
 Bash
 ``
@@ -252,7 +252,7 @@ Widget tests for key user flows
 Support for more languages
 The dependencies
 
-# Main ones:
+## Main ones:
 
 flutter_bloc and equatable for state management
 firebase_core and firebase_auth for authentication
@@ -274,7 +274,7 @@ I've tested on Android primarily, but it should work fine on iOS too
 Running a quick demo
 Want to see it in action? Here's the fastest way:
 
-# Clone the repo
+### Clone the repo
 
 Run flutter pub get
 Add your Firebase config (or let me know if you need a demo Firebase project)
@@ -282,16 +282,16 @@ Run with mock mode: flutter run --dart-define=USE_MOCK=true
 The app will work completely offline with fake data
 For the real experience with the API:
 
-# Screenshots
+## Screenshots
 
 ![login](https://github.com/user-attachments/assets/6a13250c-40ab-43a1-956f-c9e57ba0cd05)
 ![home](https://github.com/user-attachments/assets/8e859622-61b1-48a3-8ca9-7f27c2ac7cd6)
 ![trend](https://github.com/user-attachments/assets/969d8850-615a-4833-8230-947319d30257)
 
 
-# Contact
+## Contact
 
-# If you have questions or run into issues:
+## If you have questions or run into issues:
 
 Email: rabeehm802@gmail.com
 GitHub: github.com/Rabeeheee
