@@ -178,7 +178,6 @@ class ConversionBloc extends Bloc<ConversionEvent, ConversionState> {
             fromCurrency: event.from,
             toCurrency: event.to,
           ));
-          print('✅ Showed cached conversion offline!');
         },
       );
     } else {

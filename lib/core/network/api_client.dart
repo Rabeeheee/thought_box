@@ -21,15 +21,12 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           options.queryParameters['access_key'] = EnvConfig.accessKey;
-          print('REQUEST[${options.method}] => PATH: ${options.path}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
           return handler.next(response);
         },
         onError: (error, handler) {
-          print('ERROR[${error.response?.statusCode}] => MESSAGE: ${error.message}');
           return handler.next(error);
         },
       ),

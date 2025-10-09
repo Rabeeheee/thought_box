@@ -156,12 +156,14 @@ class _TrendContent extends StatelessWidget {
                             verticalInterval: 1,
                             getDrawingHorizontalLine: (value) {
                               return FlLine(
+                                // ignore: deprecated_member_use
                                 color: Colors.grey.withOpacity(0.2),
                                 strokeWidth: 1,
                               );
                             },
                             getDrawingVerticalLine: (value) {
                               return FlLine(
+                                // ignore: deprecated_member_use
                                 color: Colors.grey.withOpacity(0.2),
                                 strokeWidth: 1,
                               );
@@ -218,6 +220,7 @@ class _TrendContent extends StatelessWidget {
                           borderData: FlBorderData(
                             show: true,
                             border: Border.all(
+                              // ignore: deprecated_member_use
                               color: Colors.grey.withOpacity(0.2),
                             ),
                           ),
@@ -255,10 +258,12 @@ class _TrendContent extends StatelessWidget {
                                     Theme.of(context)
                                         .colorScheme
                                         .primary
+                                        // ignore: deprecated_member_use
                                         .withOpacity(0.3),
                                     Theme.of(context)
                                         .colorScheme
                                         .primary
+                                        // ignore: deprecated_member_use
                                         .withOpacity(0.0),
                                   ],
                                   begin: Alignment.topCenter,
@@ -305,7 +310,7 @@ class _TrendContent extends StatelessWidget {
 
             // Info Card
             Card(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
