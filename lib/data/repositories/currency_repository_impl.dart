@@ -30,11 +30,9 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
       );
       
       if (cached != null) {
-        print('✅ Using cached data for $from → $to ($amount)');
         return Right(ConversionResponse.fromJson(cached));
       }
 
-      print('⚠️ No cache, fetching from API...');
       
       // FETCH FROM API
       final response = await currencyApi.convertCurrency(
@@ -75,11 +73,9 @@ class CurrencyRepositoryImpl implements CurrencyRepository {
       );
       
       if (lastData != null) {
-        print('✅ Found cached conversion for $from → $to');
         return Right(ConversionResponse.fromJson(lastData['data']));
       }
       
-      print('⚠️ No cached conversion for $from → $to');
       return null;
     } catch (e) {
       return Left(CacheFailure('Failed to load cached data'));

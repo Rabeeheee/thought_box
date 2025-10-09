@@ -88,6 +88,7 @@ class _ResultCardState extends State<ResultCard>
                               color: Theme.of(context)
                                   .colorScheme
                                   .onPrimaryContainer
+                                  // ignore: deprecated_member_use
                                   .withOpacity(0.7),
                             ),
                       ),
@@ -116,6 +117,7 @@ class _ResultCardState extends State<ResultCard>
                               color: Theme.of(context)
                                   .colorScheme
                                   .onPrimaryContainer
+                                  // ignore: deprecated_member_use
                                   .withOpacity(0.7),
                             ),
                       ),
@@ -139,6 +141,7 @@ class _ResultCardState extends State<ResultCard>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
